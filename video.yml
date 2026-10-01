@@ -1,0 +1,53 @@
+name: Make and Upload Video
+
+on:
+  schedule:
+    - cron: "0 12 * * *"   # كل يوم 12 ظهر UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-core
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+
+      - name: Create video
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python make_video.py
+
+      - name: Upload to YouTube
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: python upload.py output.mp4
+
+      - name: Save history
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add history.json
+          git commit -m "update history" || echo "nothing to commit"
+          git push
+
+      - name: Keep video as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: video
+          path: output.mp4

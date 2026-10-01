@@ -1,0 +1,7 @@
+edge-tts
+pillow
+arabic-reshaper
+python-bidi
+google-api-python-client
+google-auth
+anthropic
