@@ -330,10 +330,16 @@ def get_topic():
     subjects = json.loads(Path("topics.json").read_text(encoding="utf-8"))
     hist_path = Path("history.json")
     history = json.loads(hist_path.read_text(encoding="utf-8")) if hist_path.exists() else []
-    
+
+    styles = [
+        "سرد حماسي وسريع مع التركيز على السرعة والتسارع",
+        "أسلوب غامض ومشوق يبرز قوة المحرك وصوته المرعب",
+        "أسلوب معلوماتي وثائقي فخم عن الفخامة والتاريخ"
+    ]
+
     n = len(history)
     subject = subjects[n % len(subjects)]
-    style = STYLES[(n // len(subjects)) % len(STYLES)]
+    style = styles[(n // len(subjects)) % len(styles)]
 
     if isinstance(subject, dict):
         subj_name = subject.get("wiki") or subject.get("video")
@@ -341,7 +347,7 @@ def get_topic():
         subj_name = subject
 
     topic_data = generate(subj_name, style, history)
-    
+
     if isinstance(subject, dict) and "video" in subject:
         topic_data["video"] = subject["video"]
     else:
