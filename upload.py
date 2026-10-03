@@ -19,17 +19,17 @@ creds = Credentials(
 youtube = build("youtube", "v3", credentials=creds)
 
 body = {
-    "snippet": {
-        "title": meta["title"][:100],
-        "description": meta["description"],
-        "tags": meta["tags"],
-        "categoryId": "27",  # Education
-    },
-    "status": {
-        "privacyStatus": "public",  # غيّرها لـ private أثناء التجربة
-        "selfDeclaredMadeForKids": False,
-    },
-}
+        'snippet': {
+            'title': topic_data.get('title', 'Car Short'),
+            'description': topic_data.get('description', ''),
+            'tags': topic_data.get('tags', []),
+            'categoryId': '2'
+        },
+        'status': {
+            'privacyStatus': 'public',
+            'selfDeclaredMadeForKids': False
+        }
+    }
 
 media = MediaFileUpload(video, mimetype="video/mp4", resumable=True)
 request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
