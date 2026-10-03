@@ -316,11 +316,27 @@ def generate(subject, style, history):
     }}
     """
 
-    response = client.models.generate_content(
-        model='gemini-3.8-flash',
-        contents=prompt,
-        config={'response_mime_type': 'application/json'}
-    )
+    models_to_try = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.0-flash']
+     response = None
+    
+    for m in models_to_try:
+        try:
+            print(f"Calling Gemini with model: {m}...")
+            response = client.models.generate_content(
+                model=m,
+                contents=prompt,
+                config={'response_mime_type': 'application/json'}
+            )
+            if response and response.text:
+                break
+        except Exception as err:
+            print(f"Model {m} busy or unavailable: {err}, trying next...")
+            continue
+
+    if not response or not response.text:
+        raise SystemExit("All Gemini models are temporarily busy. Please re-run in a moment.")
+
+    return json.loads(response.text)
 
     return json.loads(response.text)
 def get_topic():
