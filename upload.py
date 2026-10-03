@@ -1,5 +1,4 @@
 import json, os, sys
-
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -13,23 +12,23 @@ creds = Credentials(
     client_id=os.environ["YT_CLIENT_ID"],
     client_secret=os.environ["YT_CLIENT_SECRET"],
     token_uri="https://oauth2.googleapis.com/token",
-    scopes=["https://www.googleapis.com/auth/youtube.upload"],
+    scopes=["https://www.googleapis.com/auth/youtube.upload"]
 )
 
 youtube = build("youtube", "v3", credentials=creds)
 
 body = {
-        'snippet': {
-            'title': topic_data.get('title', 'Car Short'),
-            'description': topic_data.get('description', ''),
-            'tags': topic_data.get('tags', []),
-            'categoryId': '2'
-        },
-        'status': {
-            'privacyStatus': 'public',
-            'selfDeclaredMadeForKids': False
-        }
+    'snippet': {
+        'title': meta.get('title', 'Car Short #shorts'),
+        'description': meta.get('description', ''),
+        'tags': meta.get('tags', []),
+        'categoryId': '2'  # فئة السيارات والمركبات (Autos & Vehicles)
+    },
+    'status': {
+        'privacyStatus': 'public',         # نشر علني مباشر وفوري
+        'selfDeclaredMadeForKids': False   # غير مخصص للأطفال
     }
+}
 
 media = MediaFileUpload(video, mimetype="video/mp4", resumable=True)
 request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
@@ -40,4 +39,4 @@ while response is None:
     if status:
         print(f"Uploaded {int(status.progress() * 100)}%")
 
-print("Done: https://youtube.com/watch?v=" + response["id"])
+print(f"Done: https://youtube.com/watch?v={response['id']}")
