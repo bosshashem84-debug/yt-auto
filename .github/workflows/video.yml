@@ -28,7 +28,7 @@ jobs:
 
       - name: Create video
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
         run: python make_video.py
 
       - name: Upload to YouTube
