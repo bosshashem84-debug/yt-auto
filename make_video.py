@@ -316,16 +316,12 @@ def generate(subject, style, history):
     }}
     """
 
-    # جلب النموذج المتاح فعلياً في حسابك تلقائياً دون كتابة أسماء يدوي
     response = client.models.generate_content(
         model='gemini-3.8-flash',
         contents=prompt,
         config={'response_mime_type': 'application/json'}
     )
-        contents=prompt,
-        config={'response_mime_type': 'application/json'}
-    )
-    
+
     return json.loads(response.text)
 def get_topic():
     subjects = json.loads(Path("topics.json").read_text(encoding="utf-8"))
