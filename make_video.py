@@ -354,13 +354,14 @@ def get_topic():
 
     topic_data = generate(subj_name, style, history)
 
-    # ضبط كلمة البحث المطلوبة للـ video والـ query معاً
     search_term = f"{subj_name} sports car"
     if isinstance(subject, dict):
         search_term = subject.get("query") or subject.get("video") or search_term
 
     topic_data["query"] = search_term
     topic_data["video"] = search_term
+    topic_data["title"] = f"حقائق مذهلة عن سيارة {subj_name} #shorts"
+    topic_data["description"] = f"أبرز أسرار ومواصفات سيارة {subj_name}! اشترك للمزيد من عالم السيارات السريعة #shorts #cars"
 
     return topic_data, history
 def main():
