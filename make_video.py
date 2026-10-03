@@ -317,24 +317,11 @@ def generate(subject, style, history):
     """
 
     # جلب النموذج المتاح فعلياً في حسابك تلقائياً دون كتابة أسماء يدوي
-    available_model = None
-    try:
-        for m in client.models.list():
-            # البحث عن أي موديل يدعم generateContent
-            methods = getattr(m, 'supported_generation_methods', []) or []
-            actions = getattr(m, 'supported_actions', []) or []
-            if 'generateContent' in methods or 'generate_content' in actions or 'flash' in m.name.lower():
-                available_model = m.name
-                break
-    except Exception as e:
-        print(f"List models check: {e}")
-
-    # إذا لم يسترجع القائمة نستخدم الاسم المباشر
-    model_to_use = available_model or "gemini-2.0-flash"
-    print(f"--> Using auto-detected model: {model_to_use}")
-
     response = client.models.generate_content(
-        model=model_to_use,
+        model='gemini-3.8-flash',
+        contents=prompt,
+        config={'response_mime_type': 'application/json'}
+    )
         contents=prompt,
         config={'response_mime_type': 'application/json'}
     )
