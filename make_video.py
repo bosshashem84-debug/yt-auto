@@ -296,12 +296,12 @@ def generate(subject, style, history):
         raise SystemExit("GEMINI_API_KEY is missing")
 
     client = genai.Client(api_key=api_key)
-    
+
     prompt = f"""
     أنت صانع محتوى سيارات وفيديوهات YouTube Shorts.
     الموضوع: سيارة {subject}
     الأسلوب: {style}
-    
+
     المطلوب:
     اكتب سيناريو شورتس شيق من 5 إلى 7 جمل غنية بالمعلومات (مدة إلقاء صوتي بين 45 و55 ثانية).
     أرجع النتيجة بصيغة JSON حصراً بهذا الهيكل فقط دون أي نص إضافي:
@@ -317,8 +317,8 @@ def generate(subject, style, history):
     """
 
     models_to_try = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.0-flash']
-     response = None
-    
+    response = None
+
     for m in models_to_try:
         try:
             print(f"Calling Gemini with model: {m}...")
@@ -335,8 +335,6 @@ def generate(subject, style, history):
 
     if not response or not response.text:
         raise SystemExit("All Gemini models are temporarily busy. Please re-run in a moment.")
-
-    return json.loads(response.text)
 
     return json.loads(response.text)
 def get_topic():
