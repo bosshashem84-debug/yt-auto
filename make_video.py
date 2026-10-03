@@ -317,21 +317,25 @@ def generate(subject, style, history):
     }}
     """
 
-    for attempt in range(3):
-        try:
-            print(f"Calling gemini-3.8-flash (attempt {attempt + 1})...")
-            response = client.models.generate_content(
-                model='gemini-3.8-flash',
-                contents=prompt,
-                config={'response_mime_type': 'application/json'}
-            )
-            if response and response.text:
-                return json.loads(response.text)
-        except Exception as err:
-            print(f"Server busy: {err}, waiting 5 seconds...")
-            time.sleep(5)
+    # تجربة موديلات الجيل 3 المتوفرة لتفادي ضغط سيرفر محدد
+    candidate_models = ['gemini-3.8-flash', 'gemini-3.8-pro']
 
-    raise SystemExit("Gemini is currently overloaded. Please re-run later.")
+    for m in candidate_models:
+        for attempt in range(2):
+            try:
+                print(f"Calling {m} (attempt {attempt + 1})...")
+                response = client.models.generate_content(
+                    model=m,
+                    contents=prompt,
+                    config={'response_mime_type': 'application/json'}
+                )
+                if response and response.text:
+                    return json.loads(response.text)
+            except Exception as err:
+                print(f"Model {m} busy or unavailable: {err}, waiting 4 seconds...")
+                time.sleep(4)
+
+    raise SystemExit("All Gemini models are temporarily busy. Please re-run later.")
 def get_topic():
     subjects = json.loads(Path("topics.json").read_text(encoding="utf-8"))
     hist_path = Path("history.json")
