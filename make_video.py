@@ -363,13 +363,39 @@ def get_topic():
     topic_data["video"] = search_term
 
     car_tag = subj_name.replace(" ", "")
+
+    # 1. العنوان: يبدأ بـ "حقائق" + هاشتاق السيارة والهاشتاقات الثلاثة
     topic_data["title"] = f"حقائق مذهلة عن سيارة {subj_name} #{car_tag} #shorts #shortvideo #cars"
+
+    # 2. الوصف: اسم القناة Cars Motion + دعوة للاشتراك + منشن الشركة والهاشتاقات المتصدرة
     topic_data["description"] = (
-        f"أبرز أسرار ومواصفات سيارة {subj_name}!\n\n"
+        f"أبرز أسرار وحقائق مذهلة عن سيارة {subj_name}!\n\n"
+        f"مرحباً بكم في قناة Cars Motion 🔥\n"
+        "اشترك في القناة وفعّل جرس التنبيهات ليصلك كل جديد عن وحوش وعالم السرعة!\n"
+        "ما رأيك بهذه السيارة؟ شاركنا رأيك في التعليقات 👇\n\n"
         f"@{car_tag}\n\n"
-        f"#{car_tag} #shorts #shortvideo #cars"
+        f"#{car_tag} #shorts #shortvideo #cars #supercars #luxurycars #hypercar #سيارات #سيارات_سريعة"
     )
-    topic_data["tags"] = ["shorts", "shortvideo", "cars", subj_name, car_tag]
+
+    # 3. الكلمات الدلالية المخفية (Tags) الأكثر بحثاً لزيادة المشاهدات
+    topic_data["tags"] = [
+        "shorts",
+        "shortvideo",
+        "cars",
+        subj_name,
+        car_tag,
+        "Cars Motion",
+        "supercars",
+        "hypercars",
+        "luxury cars",
+        "exotic cars",
+        "car review",
+        "top speed",
+        "سيارات",
+        "سيارات خارقة",
+        "سيارات سريعة",
+        "محركات"
+    ]
 
     return topic_data, history
 def main():
