@@ -1,7 +1,7 @@
 import asyncio, glob, json, os, random, re, subprocess
 from pathlib import Path
 from urllib.parse import quote
-
+from google import genai
 import arabic_reshaper
 import edge_tts
 from bidi.algorithm import get_display
@@ -290,39 +290,64 @@ def build_slides(title, text):
     return [hook] + slides + [outro]
 
 
+def generate(subject, style, history):
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise SystemExit("GEMINI_API_KEY is missing")
+
+    client = genai.Client(api_key=api_key)
+    
+    prompt = f"""
+    أنت صانع محتوى سيارات وفيديوهات قصيرة.
+    الموضوع: سيارة {subject}
+    الأسلوب: {style}
+    
+    المطلوب:
+    اكتب سيناريو جذاب وسريع من 3 إلى 5 جمل قصيرة.
+    أرجع النتيجة بصيغة JSON حصراً بهذا الهيكل فقط:
+    {{
+        "slides": [
+            "الجملة الأولى المشوقة",
+            "الجملة الثانية عن القوة أو المحرك",
+            "الجملة الثالثة عن ميزة أسطورية",
+            "سؤال ختامي للمتابعين"
+        ]
+    }}
+    """
+    
+    response = client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=prompt,
+        config={
+            'response_mime_type': 'application/json'
+        }
+    )
+    
+    return json.loads(response.text)
+
+
 def get_topic():
     subjects = json.loads(Path("topics.json").read_text(encoding="utf-8"))
     hist_path = Path("history.json")
     history = json.loads(hist_path.read_text(encoding="utf-8")) if hist_path.exists() else []
-    subjects = [x if isinstance(x, dict) else {"wiki": x, "video": "car"}
-                for x in subjects]
-    remaining = [x for x in subjects if x["wiki"] not in history]
-    if not remaining:          # خلصت القائمة: نبدأ من جديد
-        history, remaining = [], list(subjects)
-    for item in remaining:
-        name = item["wiki"]
-        got = wiki_extract(name)
-        if got:
-            title, text = got
-            if "قد يشير" not in text[:200] and "يمكن أن يشير" not in text[:200]:
-                slides = build_slides(title, text)
-                if slides:
-                    url = "https://ar.wikipedia.org/wiki/" + quote(title.replace(" ", "_"))
-                    return {
-                        "key": name,
-                        "query": item.get("video", "car"),
-                        "title": f"{title}: معلومات سريعة",
-                        "description": (f"معلومات سريعة عن {title}.\n"
-                                        f"المصدر: ويكيبيديا العربية - {url}\n"
-                                        "النص مرخّص بموجب CC BY-SA 4.0.\n"
-                                        "#سيارات #معلومات"),
-                        "tags": ["سيارات", "معلومات عن السيارات", title],
-                        "slides": slides,
-                    }, history
-        history.append(name)   # مقالة غير صالحة: نتخطاها
-    raise SystemExit("No usable Wikipedia article found")
-# --- WIKI END -----------------------------------------------------------
+    
+    n = len(history)
+    subject = subjects[n % len(subjects)]
+    style = STYLES[(n // len(subjects)) % len(STYLES)]
 
+    if isinstance(subject, dict):
+        subj_name = subject.get("wiki") or subject.get("video")
+    else:
+        subj_name = subject
+
+    topic_data = generate(subj_name, style, history)
+    
+    if isinstance(subject, dict) and "video" in subject:
+        topic_data["video"] = subject["video"]
+    else:
+        topic_data["video"] = f"{subj_name} sports car"
+
+    return topic_data, history
 
 def main():
     topic, history = get_topic()
