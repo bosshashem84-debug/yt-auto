@@ -303,31 +303,46 @@ def generate(subject, style, history):
     الأسلوب: {style}
     
     المطلوب:
-    اكتب سيناريو شورتس شيق ومتكامل يتراوح بين 6 إلى 8 جمل غنية بالمعلومات والتفاصيل (ليستغرق إلقاؤها الصوتي قرابة 45 إلى 55 ثانية).
-    
-    أرجع النتيجة بصيغة JSON حصراً بهذا الهيكل فقط:
+    اكتب سيناريو شورتس شيق يتراوح بين 5 إلى 7 جمل غنية بالمعلومات (مدة إلقاء صوتي بين 45 و55 ثانية).
+    أرجع النتيجة بصيغة JSON حصراً بهذا الهيكل فقط دون أي نص إضافي:
     {{
         "slides": [
             "جملة افتتاحية خاطفة للانتباه",
             "معلومة قوية عن أداء المحرك والسرعة",
             "تفاصيل التصميم والهندسة المبتكرة",
-            "ميزة تاريخية أو تقنية غير معروفة",
-            "مقارنة سريعة تميزها عن المنافسين",
+            "ميزة فريدة أو تاريخية",
             "سؤال حماسي ومحفز للجمهور للتعليق"
         ]
     }}
     """
     
-    response = client.models.generate_content(
-        model='gemini-1.5-pro',
-        contents=prompt,
-        config={
-            'response_mime_type': 'application/json'
-        }
-    )
+    # اختيار النموذج المتاح تلقائياً لتفادي أي خطأ 404
+    candidate_models = [
+        'gemini-2.0-flash',
+        'gemini-2.0-flash-001',
+        'gemini-flash-latest',
+        'gemini-2.5-pro'
+    ]
     
-    return json.loads(response.text)
+    last_err = None
+    for model_name in candidate_models:
+        try:
+            print(f"Trying model: {model_name}...")
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config={
+                    'response_mime_type': 'application/json'
+                }
+            )
+            print(f"Success with model: {model_name}!")
+            return json.loads(response.text)
+        except Exception as e:
+            last_err = e
+            print(f"Failed with {model_name}: {e}")
+            continue
 
+    raise SystemExit(f"All models failed. Last error: {last_err}")
 def get_topic():
     subjects = json.loads(Path("topics.json").read_text(encoding="utf-8"))
     hist_path = Path("history.json")
