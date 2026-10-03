@@ -291,6 +291,7 @@ def build_slides(title, text):
 
 
 def generate(subject, style, history):
+    import time
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise SystemExit("GEMINI_API_KEY is missing")
@@ -316,27 +317,21 @@ def generate(subject, style, history):
     }}
     """
 
-    models_to_try = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.0-flash']
-    response = None
-
-    for m in models_to_try:
+    for attempt in range(3):
         try:
-            print(f"Calling Gemini with model: {m}...")
+            print(f"Calling gemini-3.8-flash (attempt {attempt + 1})...")
             response = client.models.generate_content(
-                model=m,
+                model='gemini-3.8-flash',
                 contents=prompt,
                 config={'response_mime_type': 'application/json'}
             )
             if response and response.text:
-                break
+                return json.loads(response.text)
         except Exception as err:
-            print(f"Model {m} busy or unavailable: {err}, trying next...")
-            continue
+            print(f"Server busy: {err}, waiting 5 seconds...")
+            time.sleep(5)
 
-    if not response or not response.text:
-        raise SystemExit("All Gemini models are temporarily busy. Please re-run in a moment.")
-
-    return json.loads(response.text)
+    raise SystemExit("Gemini is currently overloaded. Please re-run later.")
 def get_topic():
     subjects = json.loads(Path("topics.json").read_text(encoding="utf-8"))
     hist_path = Path("history.json")
