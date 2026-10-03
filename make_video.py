@@ -339,19 +339,21 @@ def get_topic():
     style = styles[(n // len(subjects)) % len(styles)]
 
     if isinstance(subject, dict):
-        subj_name = subject.get("wiki") or subject.get("video")
+        subj_name = subject.get("wiki") or subject.get("video") or subject.get("query")
     else:
         subj_name = subject
 
     topic_data = generate(subj_name, style, history)
 
-    if isinstance(subject, dict) and "video" in subject:
-        topic_data["video"] = subject["video"]
-    else:
-        topic_data["video"] = f"{subj_name} sports car"
+    # ضبط كلمة البحث المطلوبة للـ video والـ query معاً
+    search_term = f"{subj_name} sports car"
+    if isinstance(subject, dict):
+        search_term = subject.get("query") or subject.get("video") or search_term
+
+    topic_data["query"] = search_term
+    topic_data["video"] = search_term
 
     return topic_data, history
-
 def main():
     topic, history = get_topic()
 
