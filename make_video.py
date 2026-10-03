@@ -348,7 +348,7 @@ def get_topic():
     style = styles[(n // len(subjects)) % len(styles)]
 
     if isinstance(subject, dict):
-        subj_name = subject.get("wiki") or subject.get("video") or subject.get("query")
+        subj_name = subject.get("wiki") or subject.get("video") or subject.get("query") or subject.get("key")
     else:
         subj_name = subject
 
@@ -358,6 +358,7 @@ def get_topic():
     if isinstance(subject, dict):
         search_term = subject.get("query") or subject.get("video") or search_term
 
+    topic_data["key"] = subj_name
     topic_data["query"] = search_term
     topic_data["video"] = search_term
 
