@@ -298,13 +298,13 @@ def generate(subject, style, history):
     client = genai.Client(api_key=api_key)
     
     prompt = f"""
-    أنت صانع محتوى سيارات محترف لفيديوهات YouTube Shorts.
+    أنت صانع محتوى سيارات وفيديوهات YouTube Shorts.
     الموضوع: سيارة {subject}
     الأسلوب: {style}
     
     المطلوب:
-    اكتب سيناريو شورتس شيق يتراوح بين 5 إلى 7 جمل غنية بالمعلومات (مدة إلقاء صوتي بين 45 و55 ثانية).
-    أرجع النتيجة بصيغة JSON حصراً بهذا الهيكل فقط دون أي نص إضافي:
+    اكتب سيناريو شورتس شيق من 5 إلى 7 جمل غنية بالمعلومات (مدة إلقاء صوتي بين 45 و55 ثانية).
+    أرجع النتيجة بصيغة JSON حصراً بهذا الهيكل فقط:
     {{
         "slides": [
             "جملة افتتاحية خاطفة للانتباه",
@@ -315,34 +315,23 @@ def generate(subject, style, history):
         ]
     }}
     """
-    
-    # اختيار النموذج المتاح تلقائياً لتفادي أي خطأ 404
-    candidate_models = [
-        'gemini-2.0-flash',
-        'gemini-2.0-flash-001',
-        'gemini-flash-latest',
-        'gemini-2.5-pro'
-    ]
-    
-    last_err = None
-    for model_name in candidate_models:
-        try:
-            print(f"Trying model: {model_name}...")
-            response = client.models.generate_content(
-                model=model_name,
-                contents=prompt,
-                config={
-                    'response_mime_type': 'application/json'
-                }
-            )
-            print(f"Success with model: {model_name}!")
-            return json.loads(response.text)
-        except Exception as e:
-            last_err = e
-            print(f"Failed with {model_name}: {e}")
-            continue
 
-    raise SystemExit(f"All models failed. Last error: {last_err}")
+    # نطلب الموديل الموصى به مباشرة من جوجل
+    try:
+        response = client.models.generate_content(
+            model='gemini-3.0-flash',
+            contents=prompt,
+            config={'response_mime_type': 'application/json'}
+        )
+        return json.loads(response.text)
+    except Exception:
+        # إذا لم يقبله، نستخدم الاسم بالبادئة الكاملة التي طلبتها رسالة الخطأ
+        response = client.models.generate_content(
+            model='models/gemini-3.0-flash',
+            contents=prompt,
+            config={'response_mime_type': 'application/json'}
+        )
+        return json.loads(response.text)
 def get_topic():
     subjects = json.loads(Path("topics.json").read_text(encoding="utf-8"))
     hist_path = Path("history.json")
