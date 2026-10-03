@@ -298,25 +298,28 @@ def generate(subject, style, history):
     client = genai.Client(api_key=api_key)
     
     prompt = f"""
-    أنت صانع محتوى سيارات وفيديوهات قصيرة.
+    أنت صانع محتوى سيارات محترف لفيديوهات YouTube Shorts.
     الموضوع: سيارة {subject}
     الأسلوب: {style}
     
     المطلوب:
-    اكتب سيناريو جذاب وسريع من 3 إلى 5 جمل قصيرة.
+    اكتب سيناريو شورتس شيق ومتكامل يتراوح بين 6 إلى 8 جمل غنية بالمعلومات والتفاصيل (ليستغرق إلقاؤها الصوتي قرابة 45 إلى 55 ثانية).
+    
     أرجع النتيجة بصيغة JSON حصراً بهذا الهيكل فقط:
     {{
         "slides": [
-            "الجملة الأولى المشوقة",
-            "الجملة الثانية عن القوة أو المحرك",
-            "الجملة الثالثة عن ميزة أسطورية",
-            "سؤال ختامي للمتابعين"
+            "جملة افتتاحية خاطفة للانتباه",
+            "معلومة قوية عن أداء المحرك والسرعة",
+            "تفاصيل التصميم والهندسة المبتكرة",
+            "ميزة تاريخية أو تقنية غير معروفة",
+            "مقارنة سريعة تميزها عن المنافسين",
+            "سؤال حماسي ومحفز للجمهور للتعليق"
         ]
     }}
     """
     
     response = client.models.generate_content(
-        model='gemini-2.5-flash',
+        model='gemini-3.0-flash',
         contents=prompt,
         config={
             'response_mime_type': 'application/json'
@@ -324,7 +327,6 @@ def generate(subject, style, history):
     )
     
     return json.loads(response.text)
-
 
 def get_topic():
     subjects = json.loads(Path("topics.json").read_text(encoding="utf-8"))
