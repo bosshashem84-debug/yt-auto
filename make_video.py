@@ -122,7 +122,12 @@ def main():
     topic, history = get_topic()
 
     segments = []
-    for i, text in enumerate(topic["slides"]):
+    slides = topic.get("slides") or topic.get("scenes") or topic.get("points")
+    if not slides:
+        print("TOPIC CONTENT WAS:", topic)
+        raise SystemExit(f"KeyError: 'slides' missing. Received keys: {list(topic.keys()) if isinstance(topic, dict) else topic}")
+
+    for i, text in enumerate(slides):
         png, mp3, mp4 = OUT / f"s{i}.png", OUT / f"s{i}.mp3", OUT / f"s{i}.mp4"
         make_slide(text, png)
         asyncio.run(tts(text, mp3))
