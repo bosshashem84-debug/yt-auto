@@ -360,8 +360,15 @@ def get_topic():
 
     topic_data["query"] = search_term
     topic_data["video"] = search_term
-    topic_data["title"] = f"حقائق مذهلة عن سيارة {subj_name} #shorts"
-    topic_data["description"] = f"أبرز أسرار ومواصفات سيارة {subj_name}! اشترك للمزيد من عالم السيارات السريعة #shorts #cars"
+
+    car_tag = subj_name.replace(" ", "")
+    topic_data["title"] = f"حقائق مذهلة عن سيارة {subj_name} #{car_tag} #shorts #shortvideo #cars"
+    topic_data["description"] = (
+        f"أبرز أسرار ومواصفات سيارة {subj_name}!\n\n"
+        f"@{car_tag}\n\n"
+        f"#{car_tag} #shorts #shortvideo #cars"
+    )
+    topic_data["tags"] = ["shorts", "shortvideo", "cars", subj_name, car_tag]
 
     return topic_data, history
 def main():
