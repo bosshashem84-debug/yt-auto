@@ -111,8 +111,9 @@ def get_topic():
     subject = subjects[n % len(subjects)]
     # كل ما تخلص القائمة وترجع للأول، يتغير الأسلوب فيطلع الموضوع بشكل جديد
     style = STYLES[(n // len(subjects)) % len(STYLES)]
-    if isinstance(subject, dict):  # سيناريو جاهز بدون ذكاء اصطناعي
+    if isinstance(subject, dict) and "slides" in subject:
         return subject, history
+    subject = subject.get("wiki") or subject.get("video") if isinstance(subject, dict) else subject
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise SystemExit("ANTHROPIC_API_KEY is missing")
     return generate(subject, style, history), history
