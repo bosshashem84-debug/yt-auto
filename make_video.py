@@ -304,7 +304,7 @@ def generate(subject, style, history):
     
     المطلوب:
     اكتب سيناريو شورتس شيق من 5 إلى 7 جمل غنية بالمعلومات (مدة إلقاء صوتي بين 45 و55 ثانية).
-    أرجع النتيجة بصيغة JSON حصراً بهذا الهيكل فقط:
+    أرجع النتيجة بصيغة JSON حصراً بهذا الهيكل فقط دون أي نص إضافي:
     {{
         "slides": [
             "جملة افتتاحية خاطفة للانتباه",
@@ -316,22 +316,30 @@ def generate(subject, style, history):
     }}
     """
 
-    # نطلب الموديل الموصى به مباشرة من جوجل
+    # جلب النموذج المتاح فعلياً في حسابك تلقائياً دون كتابة أسماء يدوي
+    available_model = None
     try:
-        response = client.models.generate_content(
-            model='gemini-3.0-flash',
-            contents=prompt,
-            config={'response_mime_type': 'application/json'}
-        )
-        return json.loads(response.text)
-    except Exception:
-        # إذا لم يقبله، نستخدم الاسم بالبادئة الكاملة التي طلبتها رسالة الخطأ
-        response = client.models.generate_content(
-            model='models/gemini-3.0-flash',
-            contents=prompt,
-            config={'response_mime_type': 'application/json'}
-        )
-        return json.loads(response.text)
+        for m in client.models.list():
+            # البحث عن أي موديل يدعم generateContent
+            methods = getattr(m, 'supported_generation_methods', []) or []
+            actions = getattr(m, 'supported_actions', []) or []
+            if 'generateContent' in methods or 'generate_content' in actions or 'flash' in m.name.lower():
+                available_model = m.name
+                break
+    except Exception as e:
+        print(f"List models check: {e}")
+
+    # إذا لم يسترجع القائمة نستخدم الاسم المباشر
+    model_to_use = available_model or "gemini-2.0-flash"
+    print(f"--> Using auto-detected model: {model_to_use}")
+
+    response = client.models.generate_content(
+        model=model_to_use,
+        contents=prompt,
+        config={'response_mime_type': 'application/json'}
+    )
+    
+    return json.loads(response.text)
 def get_topic():
     subjects = json.loads(Path("topics.json").read_text(encoding="utf-8"))
     hist_path = Path("history.json")
